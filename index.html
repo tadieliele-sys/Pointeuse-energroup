@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENERGROUP - Pointeuse Virtuelle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    :root{
+      --bg:#f3f6fb;--surface:#ffffff;--surface-2:#eef4ff;--text:#172033;--muted:#667085;--border:#d8e1ef;
+      --primary:#145db8;--primary-2:#0d4a94;--success:#1f8f57;--warning:#e6a700;--danger:#d92d20;--info:#2563eb;
+      --radius:16px;--radius-sm:10px;--shadow:0 8px 30px rgba(15,35,70,.08);
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--text)}
+    button,input,select{font:inherit} .hidden{display:none!important}
+    .login-page{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#145db8,#0c2e60)}
+    .login-wrap{width:min(1080px,94vw);background:#fff;border-radius:24px;display:grid;grid-template-columns:1.1fr 1fr;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.25)}
+    .hero{padding:48px;background:linear-gradient(135deg,#145db8,#0d4a94);color:#fff}.hero h1{font-size:40px;margin:0 0 12px}.hero p{opacity:.92;line-height:1.6}
+    .hero ul{list-style:none;padding:0;margin:28px 0 0;display:grid;gap:12px}.hero li{padding:12px 14px;background:rgba(255,255,255,.12);border-radius:12px}
+    .panel{padding:42px}.tabs{display:flex;gap:8px;margin:18px 0 24px}.tab{flex:1;border:2px solid var(--border);background:#fff;padding:12px;border-radius:12px;cursor:pointer}.tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+    .field{margin-bottom:16px}.field label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}.field input,.field select{width:100%;padding:14px 15px;border:2px solid var(--border);border-radius:12px;background:#fff}
+    .field input:focus,.field select:focus{outline:none;border-color:var(--primary)} .btn{border:none;border-radius:12px;padding:14px 18px;cursor:pointer;font-weight:700}
+    .btn-primary{background:var(--primary);color:#fff}.btn-outline{background:#fff;border:2px solid var(--border)} .btn-danger{background:var(--danger);color:#fff}
+    .muted{color:var(--muted)} .hint{font-size:13px;color:var(--muted)} .scanner{border:2px dashed var(--primary);padding:28px;border-radius:16px;text-align:center;background:var(--surface-2);cursor:pointer}
+    .app{display:none;min-height:100vh}.app.active{display:grid;grid-template-columns:280px 1fr}
+    aside{background:#fff;border-right:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:18px}
+    .brand{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border)} .brand .logo{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#145db8,#1f8f57);color:#fff}
+    .nav{display:grid;gap:8px}.nav button{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;border:none;background:transparent;text-align:left;cursor:pointer}.nav button.active,.nav button:hover{background:var(--surface-2);color:var(--primary)}
+    .user-card{margin-top:auto;background:var(--surface-2);padding:14px;border-radius:14px}.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#145db8,#1f8f57);color:#fff;display:grid;place-items:center;font-weight:800}
+    main{padding:24px}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;background:#fff;padding:18px 22px;border-radius:16px;box-shadow:var(--shadow);margin-bottom:22px}
+    .clock{background:linear-gradient(135deg,#145db8,#0d4a94);color:#fff;padding:14px 18px;border-radius:14px;text-align:center;min-width:210px}.clock .time{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+    .grid{display:grid;gap:18px}.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:22px}.stat h3{font-size:34px;margin:8px 0 4px}.stat .icon{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--surface-2);color:var(--primary)}
+    .section{display:none}.section.active{display:block}.twocol{display:grid;grid-template-columns:2fr 1fr;gap:18px}.punch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.punch-card{text-align:center}.punch-time{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;margin:10px 0}
+    .mode-switch{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.mode-switch button.active{background:var(--surface-2);border-color:var(--primary);color:var(--primary)}
+    table{width:100%;border-collapse:collapse} th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left;font-size:14px} th{background:#f8fafc} .status{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .present{background:#dcfae6;color:#166534}.late{background:#fef0c7;color:#92400e}.absent{background:#fee2e2;color:#991b1b}.remote{background:#dbeafe;color:#1d4ed8}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}.qr-box{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}.qr-render{padding:16px;background:#fff;border:1px dashed var(--border);border-radius:14px}
+    .toast-wrap{position:fixed;top:18px;right:18px;display:grid;gap:10px;z-index:9999}.toast{padding:14px 16px;border-radius:12px;color:#fff;box-shadow:var(--shadow);min-width:280px}.success{background:var(--success)}.error{background:var(--danger)}.info{background:var(--info)}
+    @media (max-width: 980px){.login-wrap,.app.active,.twocol,.punch-grid,.stats{grid-template-columns:1fr} aside{display:none}.clock{min-width:auto}}
+  </style>
+</head>
+<body>
+<div class="toast-wrap" id="toasts"></div>
+<section class="login-page" id="loginPage">
+  <div class="login-wrap">
+    <div class="hero">
+      <h1><i class="fas fa-clock"></i> ENERGROUP</h1>
+      <p>Pointeuse virtuelle moderne avec connexion par identifiants ou QR Code, pointage complet, rapports et exports.</p>
+      <ul>
+        <li><i class="fas fa-qrcode"></i> Pointage et connexion QR</li>
+        <li><i class="fas fa-chart-line"></i> Tableau de bord et statistiques</li>
+        <li><i class="fas fa-file-export"></i> Exports Excel et PDF</li>
+        <li><i class="fas fa-user-shield"></i> Rôles Admin, RH, Employé</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h2>Connexion</h2>
+      <p class="muted">Mode test avec persistance locale</p>
+      <div class="tabs">
+        <button class="tab active" data-tab="credentials">Identifiants</button>
+        <button class="tab" data-tab="qr">QR Code</button>
+      </div>
+      <div id="credentialsPane">
+        <div class="field"><label>Nom d'utilisateur</label><input id="loginUsername" placeholder="tadeli"></div>
+        <div class="field"><label>Mot de passe</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
+        <div class="field"><label>Mode de travail</label><select id="loginWorkMode"><option value="office">Au bureau</option><option value="remote">Télétravail</option></select></div>
+        <button class="btn btn-primary" style="width:100%" id="btnLogin">Se connecter</button>
+      </div>
+      <div id="qrPane" class="hidden">
+        <div class="scanner" id="simulateScanner"><i class="fas fa-camera" style="font-size:42px"></i><h3>Scanner un QR</h3><p class="hint">Simulation : le système sélectionne un code RH disponible</p></div>
+        <div class="field" style="margin-top:16px"><label>Code QR</label><input id="qrCodeInput" placeholder="RH013-XXXX"></div>
+        <div class="field"><label>Mode de travail</label><select id="qrWorkMode"><option value="office">Au bureau</option><option value="remote">Télétravail</option></select></div>
+        <button class="btn btn-primary" style="width:100%" id="btnQRLogin">Valider le QR</button>
+      </div>
+      <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border)" class="hint">
+        Admin: <b>tadeli / XkkBnM23</b><br>RH: <b>mbeexa / HiameDKe</b><br>Employé: <b>kabted / JKi2jzCm</b>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="app" id="app">
+  <aside>
+    <div class="brand"><div class="logo"><i class="fas fa-clock"></i></div><div><strong>ENERGROUP</strong><div class="hint">Pointeuse virtuelle</div></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="user-card">
+      <div style="display:flex;gap:12px;align-items:center"><div class="avatar" id="avatar">EN</div><div><strong id="userLabel">Utilisateur</strong><div class="hint" id="roleLabel">Rôle</div></div></div>
+      <button class="btn btn-outline" style="width:100%;margin-top:12px" id="logoutBtn">Déconnexion</button>
+    </div>
+  </aside>
+  <main>
+    <div class="top"><h1 id="pageTitle">Tableau de bord</h1><div class="clock"><div class="time" id="clockTime">00:00:00</div><div id="clockDate"></div></div></div>
+
+    <div class="section active" id="dashboardSection">
+      <div class="grid stats" id="statsGrid"></div>
+      <div class="twocol" style="margin-top:18px">
+        <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Présences de la semaine</h3><button class="btn btn-outline" id="exportChartBtn">Exporter PNG</button></div><div style="height:300px"><canvas id="weeklyChart"></canvas></div></div>
+        <div class="card"><h3>Notifications</h3><div id="notificationsList"></div></div>
+      </div>
+    </div>
+
+    <div class="section" id="punchSection">
+      <div class="card">
+        <h3>Mode de travail actuel</h3>
+        <div class="mode-switch" style="margin-top:16px">
+          <button class="btn btn-outline active" id="modeOffice">Au bureau</button>
+          <button class="btn btn-outline" id="modeRemote">Télétravail</button>
+        </div>
+      </div>
+      <div class="punch-grid" style="margin-top:18px">
+        <div class="card punch-card"><h3>Entrée</h3><div class="punch-time" id="entryTime">--:--</div><div class="muted" id="entryStatus">Non pointé</div><button class="btn btn-primary" style="margin-top:14px" data-punch="entry">Pointer Entrée</button></div>
+        <div class="card punch-card"><h3>Pause</h3><div class="punch-time" id="pauseTime">--:--</div><div class="muted" id="pauseStatus">Non pointé</div><button class="btn" style="background:var(--warning);margin-top:14px" data-punch="pause">Sortir en Pause</button></div>
+        <div class="card punch-card"><h3>Retour</h3><div class="punch-time" id="returnTime">--:--</div><div class="muted" id="returnStatus">Non pointé</div><button class="btn" style="background:var(--info);color:#fff;margin-top:14px" data-punch="return">Retour de Pause</button></div>
+        <div class="card punch-card"><h3>Sortie</h3><div class="punch-time" id="exitTime">--:--</div><div class="muted" id="exitStatus">Non pointé</div><button class="btn btn-danger" style="margin-top:14px" data-punch="exit">Pointer Sortie</button></div>
+      </div>
+      <div class="card" style="margin-top:18px"><h3>Historique de pointage du jour</h3><table><thead><tr><th>Heure</th><th>Type</th><th>Mode</th><th>Statut</th></tr></thead><tbody id="todayPunchBody"></tbody></table></div>
+    </div>
+
+    <div class="section" id="employeesSection">
+      <div class="card"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><h3>Gestion des employés</h3><div class="toolbar"><button class="btn btn-primary" id="addEmployeeBtn">Ajouter</button><button class="btn btn-outline" id="exportEmployeesExcelBtn">Excel</button><button class="btn btn-outline" id="exportEmployeesPdfBtn">PDF</button></div></div>
+      <div class="toolbar" style="margin:16px 0"><input id="searchEmployee" placeholder="Rechercher" style="padding:12px 14px;border:2px solid var(--border);border-radius:12px;min-width:220px"><select id="filterRole" style="padding:12px 14px;border:2px solid var(--border);border-radius:12px"><option value="">Tous les rôles</option><option>Administrateur</option><option>RH</option><option>Employé</option></select></div>
+      <table><thead><tr><th>Matricule</th><th>Nom complet</th><th>Fonction</th><th>Rôle</th><th>Téléphone</th><th>Statut</th></tr></thead><tbody id="employeesBody"></tbody></table></div>
+    </div>
+
+    <div class="section" id="attendanceSection">
+      <div class="card"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><h3>Suivi des présences</h3><div class="toolbar"><button class="btn btn-outline" id="exportAttendanceExcelBtn">Excel</button><button class="btn btn-outline" id="exportAttendancePdfBtn">PDF</button></div></div>
+      <table style="margin-top:16px"><thead><tr><th>Date</th><th>Employé</th><th>Entrée</th><th>Pause</th><th>Retour</th><th>Sortie</th><th>Mode</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
+    </div>
+
+    <div class="section" id="reportsSection">
+      <div class="card"><h3>Rapports</h3><p class="muted">Synthèse hebdomadaire et mensuelle basée sur les données locales.</p><div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:16px"><div class="card"><strong>Cette semaine</strong><div id="weeklySummary" class="hint" style="margin-top:10px"></div></div><div class="card"><strong>Ce mois</strong><div id="monthlySummary" class="hint" style="margin-top:10px"></div></div></div></div>
+    </div>
+
+    <div class="section" id="qrcodeSection">
+      <div class="card"><h3>Générateur de QR code</h3><div class="qr-box" style="margin-top:16px"><div style="min-width:280px;flex:1"><div class="field"><label>Employé</label><select id="qrEmployeeSelect"></select></div><button class="btn btn-primary" id="generateQrBtn">Générer</button><button class="btn btn-outline" id="downloadQrBtn" style="margin-left:8px">Télécharger PNG</button><div class="hint" id="qrText" style="margin-top:12px"></div></div><div class="qr-render"><div id="qrRender"></div></div></div></div>
+    </div>
+  </main>
+</section>
+
+<script>
+const STORAGE_KEY = 'energroup_pointeuse_v1';
+const todayKey = () => new Date().toISOString().slice(0,10);
+const uid = () => Math.random().toString(36).slice(2,10);
+const formatTime = d => new Date(d).toLocaleTimeString('fr-FR');
+const formatDate = d => new Date(d).toLocaleDateString('fr-FR', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+const safeGet = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; } catch(e){ return null; } };
+const safeSet = (v) => localStorage.setItem(STORAGE_KEY, JSON.stringify(v));
+
+const seed = {
+  currentUser: null,
+  employees: [
+    {id:'EMP001', qrCode:'ADMIN-TADELI', username:'tadeli', password:'XkkBnM23', firstName:'Tadeli', lastName:'Admin', fullName:'Tadeli Admin', function:'Directeur Système', role:'Administrateur', phone:'+243000000001', status:'actif'},
+    {id:'RH001', qrCode:'RH001-MBEEXA', username:'mbeexa', password:'HiameDKe', firstName:'Mbe', lastName:'Exa', fullName:'Mbe Exa', function:'Responsable RH', role:'RH', phone:'+243000000002', status:'actif'},
+    {id:'EMP002', qrCode:'EMP002-KABTED', username:'kabted', password:'JKi2jzCm', firstName:'Kab', lastName:'Ted', fullName:'Kab Ted', function:'Technicien', role:'Employé', phone:'+243000000003', status:'actif'},
+    {id:'RH013', qrCode:'RH013-ENERGROUP', username:'rh013', password:'Test1234', fullName:'Agent RH 013', function:'Agent RH', role:'Employé', phone:'+243000000013', status:'actif'},
+    {id:'RH014', qrCode:'RH014-ENERGROUP', username:'rh014', password:'Test1234', fullName:'Agent RH 014', function:'Agent RH', role:'Employé', phone:'+243000000014', status:'actif'},
+    {id:'RH015', qrCode:'RH015-ENERGROUP', username:'rh015', password:'Test1234', fullName:'Agent RH 015', function:'Agent RH', role:'Employé', phone:'+243000000015', status:'actif'},
+    {id:'RH016', qrCode:'RH016-ENERGROUP', username:'rh016', password:'Test1234', fullName:'Agent RH 016', function:'Agent RH', role:'Employé', phone:'+243000000016', status:'actif'},
+    {id:'RH017', qrCode:'RH017-ENERGROUP', username:'rh017', password:'Test1234', fullName:'Agent RH 017', function:'Agent RH', role:'Employé', phone:'+243000000017', status:'actif'},
+    {id:'RH018', qrCode:'RH018-ENERGROUP', username:'rh018', password:'Test1234', fullName:'Agent RH 018', function:'Agent RH', role:'Employé', phone:'+243000000018', status:'actif'},
+    {id:'RH019', qrCode:'RH019-ENERGROUP', username:'rh019', password:'Test1234', fullName:'Agent RH 019', function:'Agent RH', role:'Employé', phone:'+243000000019', status:'actif'},
+    {id:'RH020', qrCode:'RH020-ENERGROUP', username:'rh020', password:'Test1234', fullName:'Agent RH 020', function:'Agent RH', role:'Employé', phone:'+243000000020', status:'actif'},
+    {id:'RH021', qrCode:'RH021-ENERGROUP', username:'rh021', password:'Test1234', fullName:'Agent RH 021', function:'Agent RH', role:'Employé', phone:'+243000000021', status:'actif'},
+    {id:'RH022', qrCode:'RH022-ENERGROUP', username:'rh022', password:'Test1234', fullName:'Agent RH 022', function:'Agent RH', role:'Employé', phone:'+243000000022', status:'actif'}
+  ],
+  punches: [],
+  notifications: [
+    {id:uid(), text:'Bienvenue sur la pointeuse ENERGROUP.', level:'info'},
+    {id:uid(), text:'Le pointage télétravail est activé.', level:'info'},
+    {id:uid(), text:'Les exports Excel et PDF sont disponibles.', level:'success'}
+  ]
+};
+
+let db = safeGet() || seed;
+let weeklyChart;
+let currentSection = 'dashboardSection';
+let currentWorkMode = 'office';
+
+function save(){ safeSet(db); }
+function toast(msg, type='info'){ const t=document.createElement('div'); t.className=`toast ${type}`; t.textContent=msg; document.getElementById('toasts').appendChild(t); setTimeout(()=>t.remove(),3500); }
+function initials(name){ return name.split(' ').map(v=>v[0]).slice(0,2).join('').toUpperCase(); }
+function nowStr(){ return new Date().toISOString(); }
+function currentUser(){ return db.currentUser ? db.employees.find(e=>e.id===db.currentUser.id) : null; }
+function sameDay(a,b){ return a.slice(0,10)===b.slice(0,10); }
+function getTodayPunches(userId){ return db.punches.filter(p => p.userId===userId && sameDay(p.timestamp, nowStr())); }
+function roleCanManageEmployees(role){ return ['Administrateur','RH'].includes(role); }
+function roleSections(role){ const base=[['dashboardSection','Tableau de bord','fa-home'],['punchSection','Pointage','fa-fingerprint'],['attendanceSection','Présences','fa-clipboard-check'],['reportsSection','Rapports','fa-chart-column']]; if(roleCanManageEmployees(role)) base.splice(2,0,['employeesSection','Employés','fa-users'],['qrcodeSection','QR Codes','fa-qrcode']); return base; }
+
+function bootstrap(){ renderClock(); setInterval(renderClock,1000); bindLoginTabs(); bindActions(); if(db.currentUser){ showApp(); } }
+function renderClock(){ const n=new Date(); document.getElementById('clockTime').textContent=n.toLocaleTimeString('fr-FR'); document.getElementById('clockDate').textContent=formatDate(n); }
+function bindLoginTabs(){ document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); const isCred=btn.dataset.tab==='credentials'; document.getElementById('credentialsPane').classList.toggle('hidden',!isCred); document.getElementById('qrPane').classList.toggle('hidden',isCred); }); }
+function bindActions(){
+  document.getElementById('btnLogin').onclick=login;
+  document.getElementById('btnQRLogin').onclick=loginQR;
+  document.getElementById('simulateScanner').onclick=simulateScan;
+  document.getElementById('logoutBtn').onclick=logout;
+  document.getElementById('modeOffice').onclick=()=>setMode('office');
+  document.getElementById('modeRemote').onclick=()=>setMode('remote');
+  document.querySelectorAll('[data-punch]').forEach(b=>b.onclick=()=>punch(b.dataset.punch));
+  document.getElementById('searchEmployee').oninput=renderEmployees;
+  document.getElementById('filterRole').onchange=renderEmployees;
+  document.getElementById('addEmployeeBtn').onclick=addEmployee;
+  document.getElementById('exportEmployeesExcelBtn').onclick=()=>exportExcel('employes', db.employees.map(({password,...e})=>e));
+  document.getElementById('exportAttendanceExcelBtn').onclick=()=>exportExcel('presences', buildAttendanceRows());
+  document.getElementById('exportEmployeesPdfBtn').onclick=()=>exportPDF('Employés ENERGROUP', db.employees.map(e=>[e.id,e.fullName,e.function,e.role,e.phone,e.status]));
+  document.getElementById('exportAttendancePdfBtn').onclick=()=>exportPDF('Présences ENERGROUP', buildAttendanceRows().map(r=>Object.values(r)));
+  document.getElementById('generateQrBtn').onclick=generateQr;
+  document.getElementById('downloadQrBtn').onclick=downloadQr;
+  document.getElementById('exportChartBtn').onclick=exportChartImage;
+}
+function login(){ const u=document.getElementById('loginUsername').value.trim(); const p=document.getElementById('loginPassword').value.trim(); const wm=document.getElementById('loginWorkMode').value; const user=db.employees.find(e=>e.username===u && e.password===p); if(!user){ toast('Identifiants invalides','error'); return; } db.currentUser={id:user.id,workMode:wm}; currentWorkMode=wm; save(); showApp(); toast(`Bienvenue ${user.fullName}`,'success'); }
+function loginQR(){ const code=document.getElementById('qrCodeInput').value.trim().toUpperCase(); const wm=document.getElementById('qrWorkMode').value; const user=db.employees.find(e=>e.qrCode===code || e.id===code || code.startsWith(e.id)); if(!user){ toast('QR Code inconnu','error'); return; } db.currentUser={id:user.id,workMode:wm}; currentWorkMode=wm; save(); showApp(); toast(`Connexion QR réussie : ${user.fullName}`,'success'); }
+function simulateScan(){ const qrUsers=db.employees.filter(e=>/^RH0\d+/.test(e.id)); const pick=qrUsers[Math.floor(Math.random()*qrUsers.length)] || db.employees[0]; document.getElementById('qrCodeInput').value=pick.qrCode; toast(`QR simulé : ${pick.qrCode}`,'info'); }
+function logout(){ db.currentUser=null; save(); document.getElementById('app').classList.remove('active'); document.getElementById('loginPage').style.display='grid'; toast('Déconnexion effectuée','info'); }
+function showApp(){ document.getElementById('loginPage').style.display='none'; document.getElementById('app').classList.add('active'); const user=currentUser(); if(!user){ logout(); return; } renderNav(); document.getElementById('avatar').textContent=initials(user.fullName); document.getElementById('userLabel').textContent=user.fullName; document.getElementById('roleLabel').textContent=user.role; setMode(db.currentUser.workMode || 'office'); showSection('dashboardSection'); renderAll(); }
+function renderNav(){ const user=currentUser(); const nav=document.getElementById('nav'); nav.innerHTML=''; roleSections(user.role).forEach(([id,label,icon],idx)=>{ const b=document.createElement('button'); b.className=idx===0?'active':''; b.innerHTML=`<i class="fas ${icon}"></i><span>${label}</span>`; b.onclick=()=>showSection(id,b); nav.appendChild(b); }); }
+function showSection(id,btn){ currentSection=id; document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===id)); document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); else { const match=[...document.querySelectorAll('.nav button')].find(b=>b.textContent.trim().toLowerCase().includes(sectionTitle(id).toLowerCase().split(' ')[0])); if(match) match.classList.add('active'); } document.getElementById('pageTitle').textContent=sectionTitle(id); renderAll(); }
+function sectionTitle(id){ return ({dashboardSection:'Tableau de bord',punchSection:'Pointage',employeesSection:'Gestion des employés',attendanceSection:'Suivi des présences',reportsSection:'Rapports',qrcodeSection:'Générateur de QR code'})[id] || 'ENERGROUP'; }
+function setMode(mode){ currentWorkMode=mode; if(db.currentUser) db.currentUser.workMode=mode; save(); document.getElementById('modeOffice').classList.toggle('active',mode==='office'); document.getElementById('modeRemote').classList.toggle('active',mode==='remote'); }
+function punch(type){ const user=currentUser(); if(!user) return; const timestamp=nowStr(); db.punches.push({id:uid(), userId:user.id, type, mode:currentWorkMode, timestamp, status: currentWorkMode==='remote' ? 'Télétravail' : 'Bureau'}); db.notifications.unshift({id:uid(), text:`${user.fullName} a pointé ${labelPunch(type)} à ${formatTime(timestamp)}.`, level:'success'}); save(); renderPunchSection(); renderDashboard(); renderAttendance(); renderReports(); toast(`${labelPunch(type)} enregistré`,'success'); }
+function labelPunch(type){ return ({entry:'Entrée',pause:'Pause',return:'Retour',exit:'Sortie'})[type]; }
+function renderAll(){ renderDashboard(); renderPunchSection(); renderEmployees(); renderAttendance(); renderReports(); renderQrEmployees(); }
+function renderDashboard(){ const stats=document.getElementById('statsGrid'); const total=db.employees.length; const today=todayKey(); const todayPunches=db.punches.filter(p=>p.timestamp.startsWith(today)); const present=new Set(todayPunches.filter(p=>p.type==='entry').map(p=>p.userId)).size; const late=Math.max(0, Math.floor(present*0.15)); const remote=new Set(todayPunches.filter(p=>p.mode==='remote').map(p=>p.userId)).size; const data=[['Employés total',total,'fa-users'],['Présents aujourd\'hui',present,'fa-check-circle'],['En retard',late,'fa-clock'],['Télétravail',remote,'fa-house-laptop']]; stats.innerHTML=data.map(([label,value,icon])=>`<div class="card stat"><div class="icon"><i class="fas ${icon}"></i></div><h3>${value}</h3><div class="muted">${label}</div></div>`).join(''); const list=document.getElementById('notificationsList'); list.innerHTML=db.notifications.slice(0,6).map(n=>`<div style="padding:12px 0;border-bottom:1px solid var(--border)">${n.text}</div>`).join('') || '<div class="hint">Aucune notification</div>'; renderWeeklyChart(); }
+function renderWeeklyChart(){ const labels=[]; const values=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const key=d.toISOString().slice(0,10); labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'})); values.push(new Set(db.punches.filter(p=>p.timestamp.startsWith(key) && p.type==='entry').map(p=>p.userId)).size); } const ctx=document.getElementById('weeklyChart'); if(weeklyChart) weeklyChart.destroy(); weeklyChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Présences',data:values,backgroundColor:'#145db8',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}); }
+function renderPunchSection(){ const user=currentUser(); if(!user) return; const punches=getTodayPunches(user.id); const latest={entry:null,pause:null,return:null,exit:null}; punches.forEach(p=>latest[p.type]=p); ['entry','pause','return','exit'].forEach(type=>{ document.getElementById(type+'Time').textContent=latest[type]?formatTime(latest[type].timestamp):'--:--'; document.getElementById(type+'Status').textContent=latest[type]?(latest[type].mode==='remote'?'Pointé à distance':'Pointé au bureau'):'Non pointé'; }); const body=document.getElementById('todayPunchBody'); body.innerHTML=punches.length ? punches.map(p=>`<tr><td>${formatTime(p.timestamp)}</td><td>${labelPunch(p.type)}</td><td>${p.mode==='remote'?'Télétravail':'Bureau'}</td><td><span class="status ${p.mode==='remote'?'remote':'present'}">${p.status}</span></td></tr>`).join('') : '<tr><td colspan="4" class="muted">Aucun pointage aujourd\'hui</td></tr>'; }
+function renderEmployees(){ const user=currentUser(); const body=document.getElementById('employeesBody'); const search=(document.getElementById('searchEmployee').value||'').toLowerCase(); const role=document.getElementById('filterRole').value; const list=db.employees.filter(e=>(!search || [e.id,e.fullName,e.function,e.phone].join(' ').toLowerCase().includes(search)) && (!role || e.role===role)); body.innerHTML=list.map(e=>`<tr><td>${e.id}</td><td>${e.fullName}</td><td>${e.function}</td><td>${e.role}</td><td>${e.phone}</td><td><span class="status present">${e.status}</span></td></tr>`).join(''); const section=document.getElementById('employeesSection'); section.style.display=roleCanManageEmployees(user.role) ? (currentSection==='employeesSection'?'block':'none') : 'none'; }
+function addEmployee(){ const user=currentUser(); if(!roleCanManageEmployees(user.role)){ toast('Action réservée à Admin/RH','error'); return; } const name=prompt('Nom complet du nouvel employé'); if(!name) return; const id='EMP'+String(db.employees.filter(e=>e.id.startsWith('EMP')).length+1).padStart(3,'0'); const username=name.toLowerCase().replace(/\s+/g,'.'); db.employees.push({id,qrCode:`${id}-ENERGROUP`,username,password:'Temp1234',fullName:name,function:'Employé',role:'Employé',phone:'+243',status:'actif'}); save(); renderEmployees(); renderDashboard(); renderQrEmployees(); toast(`Employé ${name} ajouté`,'success'); }
+function buildAttendanceRows(){ const rows=[]; db.punches.forEach(p=>{ let row=rows.find(r=>r.date===p.timestamp.slice(0,10) && r.userId===p.userId); if(!row){ const e=db.employees.find(x=>x.id===p.userId); row={date:p.timestamp.slice(0,10), userId:p.userId, employe:e?.fullName||p.userId, entry:'',pause:'',return:'',exit:'',mode:p.mode}; rows.push(row); } row[p.type]=formatTime(p.timestamp); row.mode=p.mode==='remote'?'Télétravail':'Bureau'; }); return rows.sort((a,b)=>b.date.localeCompare(a.date)); }
+function renderAttendance(){ const body=document.getElementById('attendanceBody'); const rows=buildAttendanceRows(); body.innerHTML=rows.length ? rows.map(r=>`<tr><td>${r.date}</td><td>${r.employe}</td><td>${r.entry}</td><td>${r.pause}</td><td>${r.return}</td><td>${r.exit}</td><td><span class="status ${r.mode==='Télétravail'?'remote':'present'}">${r.mode}</span></td></tr>`).join('') : '<tr><td colspan="7" class="muted">Aucune donnée</td></tr>'; }
+function renderReports(){ const rows=buildAttendanceRows(); document.getElementById('weeklySummary').innerHTML=`Pointages enregistrés : <b>${rows.filter(r=>{const d=new Date(r.date); const now=new Date(); return (now-d)/(1000*3600*24)<=7;}).length}</b><br>Employés actifs : <b>${db.employees.filter(e=>e.status==='actif').length}</b>`; document.getElementById('monthlySummary').innerHTML=`Lignes de présence : <b>${rows.filter(r=>r.date.slice(0,7)===todayKey().slice(0,7)).length}</b><br>Télétravail : <b>${rows.filter(r=>r.mode==='Télétravail').length}</b>`; }
+function renderQrEmployees(){ const select=document.getElementById('qrEmployeeSelect'); select.innerHTML=db.employees.map(e=>`<option value="${e.id}">${e.id} - ${e.fullName}</option>`).join(''); if(!document.getElementById('qrRender').innerHTML) generateQr(); }
+function generateQr(){ const id=document.getElementById('qrEmployeeSelect').value; const emp=db.employees.find(e=>e.id===id); const target=document.getElementById('qrRender'); target.innerHTML=''; new QRCode(target,{text:emp.qrCode,width:220,height:220,colorDark:'#145db8',colorLight:'#ffffff'}); document.getElementById('qrText').textContent=`Contenu QR : ${emp.qrCode}`; }
+function downloadQr(){ const img=document.querySelector('#qrRender img') || document.querySelector('#qrRender canvas'); if(!img){ toast('Générez un QR d\'abord','error'); return; } const a=document.createElement('a'); a.download='qrcode-energroup.png'; a.href=img.tagName==='IMG'?img.src:img.toDataURL('image/png'); a.click(); }
+function exportExcel(name, rows){ const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data'); XLSX.writeFile(wb, `${name}.xlsx`); }
+function exportPDF(title, rows){ const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.setFontSize(16); doc.text(title, 14, 18); doc.setFontSize(10); let y=30; rows.forEach(r=>{ const line=Array.isArray(r)?r.join(' | '):Object.values(r).join(' | '); if(y>280){ doc.addPage(); y=20; } doc.text(String(line).slice(0,180), 14, y); y+=8; }); doc.save(title.toLowerCase().replace(/\s+/g,'-')+'.pdf'); }
+function exportChartImage(){ const link=document.createElement('a'); link.download='presences-semaine.png'; link.href=document.getElementById('weeklyChart').toDataURL('image/png'); link.click(); }
+bootstrap();
+</script>
+</body>
+</html>
