@@ -190,7 +190,7 @@ function currentUser(){ return db.currentUser ? db.employees.find(e=>e.id===db.c
 function sameDay(a,b){ return a.slice(0,10)===b.slice(0,10); }
 function getTodayPunches(userId){ return db.punches.filter(p => p.userId===userId && sameDay(p.timestamp, nowStr())); }
 function roleCanManageEmployees(role){ return ['Administrateur','RH'].includes(role); }
-function roleSections(role){ const base=[['dashboardSection','Tableau de bord','fa-home'],['punchSection','Pointage','fa-fingerprint'],['attendanceSection','Présences','fa-clipboard-check'],['reportsSection','Rapports','fa-chart-column']]; if(roleCanManageEmployees(role)) base.splice(2,0,['employeesSection','Employés','fa-users'],['qrcodeSection','QR Codes','fa-qrcode']); return base; }
+function roleSections(role){ const base=[['dashboardSection','Tableau de bord','fa-home'],['punchSection','Pointage','fa-fingerprint'],['attendanceSection','Présences','fa-clipboard-check'],['reportsSection','Rapports','fa-chart-column']]; if(['DG','DT'].includes(role)) return base; if(roleCanManageEmployees(role)) base.splice(2,0,['employeesSection','Employés','fa-users'],['qrcodeSection','QR Codes','fa-qrcode']); return base; }
 
 function bootstrap(){ renderClock(); setInterval(renderClock,1000); bindLoginTabs(); bindActions(); if(db.currentUser){ showApp(); } }
 function renderClock(){ const n=new Date(); document.getElementById('clockTime').textContent=n.toLocaleTimeString('fr-FR'); document.getElementById('clockDate').textContent=formatDate(n); }
